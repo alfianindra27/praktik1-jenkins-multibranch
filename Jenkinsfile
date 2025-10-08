@@ -6,22 +6,24 @@ pipeline {
         }
     }
 
-    stages{
+    stages {
         stage('Install Dependencies') {
             steps {
                 sh 'pip install -r requirements.txt'
             }
         }
+
         stage('Run Tests') {
             steps {
                 sh 'pytest test_app.py'
             }
         }
+
         stage('Deploy') {
             when {
                 anyOf {
                     branch 'main'
-                    branch pattern: "release/.*", comprator: "REGEXP"
+                    branch pattern: "release/.*", comparator: "REGEXP"
                 }
             }
             steps {
@@ -34,25 +36,26 @@ pipeline {
         success {
             script {
                 def payload = [
-                    content: "✅ Build SUCCESS on `${env.BRANCH_NAME}`\nURL: ${env.BUILD_URL}"
+                    content: "✅ Build SUCCESS on `${env.BRANCH_NAME}`\n🔗URL: ${env.BUILD_URL}"
                 ]
                 httpRequest(
-                    httpMode: 'POST'
+                    httpMode: 'POST',
                     contentType: 'APPLICATION_JSON',
-                    requestBody: groovy.json.JsonOutput.toJson(payload)
+                    requestBody: groovy.json.JsonOutput.toJson(payload),
                     url: 'https://discord.com/api/webhooks/1425353703581552741/YElLcdan0aCqoY2V3lxsI9L7x6dgc7ddnpTHq51txjGT4Vj7gTZgprxWIkHn7OU7jFwZ'
                 )
             }
         }
+
         failure {
             script {
                 def payload = [
-                    content: "❌ Build FAILED on `${env.BRANCH_NAME}`\nURL: ${env.BUILD_URL}"
+                    content: "❌ Build FAILED on `${env.BRANCH_NAME}`\n🔗URL: ${env.BUILD_URL}"
                 ]
                 httpRequest(
-                    httpMode: 'POST'
+                    httpMode: 'POST',
                     contentType: 'APPLICATION_JSON',
-                    requestBody: groovy.json.JsonOutput.toJson(payload)
+                    requestBody: groovy.json.JsonOutput.toJson(payload),
                     url: 'https://discord.com/api/webhooks/1425353703581552741/YElLcdan0aCqoY2V3lxsI9L7x6dgc7ddnpTHq51txjGT4Vj7gTZgprxWIkHn7OU7jFwZ'
                 )
             }
